@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    <title>PromptPay Pro</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #4338ca, #3b82f6);
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            font-family: 'Prompt', sans-serif; 
+            background: var(--bg-gradient); 
+            margin: 0; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            padding: 20px;
+            color: #333;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 30px 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* HEADER: ปรับใหม่ให้รองรับ Logo */
+        .card-header-custom {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .promptpay-logo {
+            max-width: 200px; /* คุมขนาดโลโก้ */
+            height: auto;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .app-title {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #64748b;
+            margin: 0;
+        }
+
+        /* Input Fields */
+        .form-floating > .form-control {
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            height: 55px;
+            min-height: 55px;
+        }
+        .form-floating > .form-control:focus {
+            border-color: #4338ca;
+            box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.1);
+        }
+        .form-floating > label { padding-top: 0.85rem; }
+
+        /* Button */
+        .btn-generate {
+            background: var(--primary-gradient);
+            border: none;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+            transition: all 0.2s;
+        }
+        .btn-generate:active { transform: scale(0.98); }
+
+        /* Result Section */
+        #resultSection { display: none; text-align: center; }
+
+        .qr-frame {
+            padding: 10px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            display: inline-block;
+            margin-bottom: 15px;
+            background: #fff;
+        }
+
+        .amount-display {
+            color: #4338ca;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+            gap: 5px;
+        }
+        .amount-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .amount-unit {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        .id-badge {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+    </style>
+
+<link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+
+<div class="app-container">
+    <div class="main-card">
+        
+        <div class="card-header-custom">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/PromptPay-logo.png" alt="PromptPay" class="promptpay-logo">
+            <p class="app-title">สร้าง QR Code รับเงิน</p>
+        </div>
+
+        <div id="formSection">
+            <form id="promptpayForm">
+                
+                <div class="form-floating mb-3">
+                    <input type="tel" class="form-control" id="promptpayID" placeholder="เลขบัตร/เบอร์โทร" required inputmode="numeric">
+                    <label for="promptpayID"><i class="bi bi-person-vcard me-2"></i>เบอร์โทร / เลขบัตรประชาชน</label>
+                </div>
+
+                <div class="form-floating mb-4">
+                    <input type="number" step="0.01" class="form-control text-end fs-5 fw-bold text-dark" id="amountInput" placeholder="0.00" required inputmode="decimal">
+                    <label for="amountInput"><i class="bi bi-currency-exchange me-2"></i>จำนวนเงิน</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 btn-generate">
+                    สร้าง QR Code
+                </button>
+            </form>
+        </div>
+
+        <div id="resultSection">
+            <div class="qr-frame">
+                <img id="qrImage" src="" alt="QR Code" width="200" height="200" style="display: block;">
+            </div>
+
+            <div class="amount-display">
+                <span class="amount-number" id="showAmount">0.00</span>
+                <span class="amount-unit">บาท</span>
+            </div>
+
+            <div class="mb-4">
+                <div class="id-badge">
+                    <i class="bi bi-wallet2"></i>
+                    <span id="showID">000-000-0000</span>
+                </div>
+            </div>
+
+            <button onclick="resetForm()" class="btn btn-light w-100 rounded-pill py-2 text-muted fw-bold" style="background: #f1f5f9;">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> ทำรายการใหม่
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // SCRIPT
+    // ==========================================
+    window.onload = function() {
+        const savedID = localStorage.getItem('lastPromptPayID');
+        if (savedID) document.getElementById('promptpayID').value = savedID;
+    }
+
+    document.getElementById('promptpayForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        let targetID = document.getElementById('promptpayID').value.trim();
+        const amount = parseFloat(document.getElementById('amountInput').value);
+        
+        targetID = targetID.replace(/[^0-9]/g, '');
+
+        if (targetID.length !== 10 && targetID.length !== 13) {
+            alert('กรุณากรอกเบอร์มือถือ (10 หลัก) หรือเลขบัตร (13 หลัก)');
+            return;
+        }
+
+        if (amount > 0) {
+            document.activeElement.blur();
+            localStorage.setItem('lastPromptPayID', targetID);
+
+            const payload = generatePromptPayPayload(targetID, amount);
+            const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=5&data=" + encodeURIComponent(payload);
+
+            document.getElementById('qrImage').src = qrUrl;
+            document.getElementById('showAmount').innerText = amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('showID').innerText = formatDisplayID(targetID);
+
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('resultSection').style.display = 'block';
+        }
+    });
+
+    function resetForm() {
+        document.getElementById('resultSection').style.display = 'none';
+        document.getElementById('formSection').style.display = 'block';
+        document.getElementById('amountInput').value = '';
+        setTimeout(() => document.getElementById('amountInput').focus(), 100);
+    }
+
+    function formatDisplayID(id) {
+        if (id.length === 10) return id.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+        else if (id.length === 13) return id.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, '$1-$2-$3-$4-$5');
+        return id;
+    }
+
+    // ==========================================
+    // LOGIC
+    // ==========================================
+    function generatePromptPayPayload(target, amount) {
+        let merchantInfo = "0016A000000677010111"; 
+        if (target.length >= 13) {
+            merchantInfo += "02" + f2(target.length) + target;
+        } else if (target.length === 10 && target.startsWith('0')) {
+            target = "0066" + target.substring(1);
+            merchantInfo += "01" + f2(target.length) + target;
+        } else {
+            merchantInfo += "02" + f2(target.length) + target;
+        }
+
+        let data = [
+            "000201", 
+            amount ? "010212" : "010211", 
+            "29" + f2(merchantInfo.length) + merchantInfo, 
+            "5802TH", 
+            "5303764"
+        ];
+        
+        if (amount) {
+            let amtStr = amount.toFixed(2);
+            data.push("54" + f2(amtStr.length) + amtStr);
+        }
+        return data.join("") + "6304" + crc16(data.join("") + "6304");
+    }
+
+    function f2(num) { return num.toString().padStart(2, '0'); }
+    function crc16(data) {
+        let crc = 0xFFFF;
+        for (let i = 0; i < data.length; i++) {
+            let x = ((crc >> 8) ^ data.charCodeAt(i)) & 0xFF;
+            x ^= x >> 4;
+            crc = ((crc << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF;
+        }
+        return crc.toString(16).toUpperCase().padStart(4, '0');
+    }
+</script>
+
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
+</body>
+
+</html>
